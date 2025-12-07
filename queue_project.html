@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queue & Circular Queue Implementation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .queue-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        input[type="number"] {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .visualization {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            min-height: 80px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+        
+        .queue-element {
+            min-width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .pointer {
+            font-size: 14px;
+            color: #666;
+            font-weight: bold;
+        }
+        
+        .info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info p {
+            margin: 5px 0;
+            color: #333;
+        }
+        
+        .code-section {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .code-section pre {
+            margin: 0;
+        }
+        
+        .keyword { color: #c678dd; }
+        .type { color: #e5c07b; }
+        .function { color: #61afef; }
+        .string { color: #98c379; }
+        .comment { color: #5c6370; font-style: italic; }
+        
+        .circular-viz {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            position: relative;
+        }
+        
+        .circular-element {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        
+        .empty-slot {
+            background: #ddd;
+            color: #999;
+        }
+        
+        .output {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Queue & Circular Queue Implementation in C++</h1>
+        
+        <!-- Linear Queue Section -->
+        <div class="queue-section">
+            <h2>Linear Queue (Array Implementation)</h2>
+            
+            <div class="controls">
+                <input type="number" id="queueInput" placeholder="Value" min="0">
+                <button onclick="enqueueLinear()">Enqueue</button>
+                <button onclick="dequeueLinear()">Dequeue</button>
+                <button onclick="peekLinear()">Peek/Front</button>
+                <button onclick="displayLinear()">Display</button>
+                <button onclick="isEmptyLinear()">Is Empty?</button>
+                <button onclick="isFullLinear()">Is Full?</button>
+                <button onclick="clearLinear()">Clear</button>
+            </div>
+            
+            <div class="visualization" id="linearViz">
+                <span class="pointer">Front →</span>
+                <span style="color: #999;">Empty Queue</span>
+            </div>
+            
+            <div class="info">
+                <p><strong>Front Index:</strong> <span id="frontIdx">-1</span></p>
+                <p><strong>Rear Index:</strong> <span id="rearIdx">-1</span></p>
+                <p><strong>Size:</strong> <span id="queueSize">0</span> / 10</p>
+            </div>
+            
+            <div class="output" id="queueOutput" style="display: none;"></div>
+            
+            <div class="code-section">
+                <pre><span class="comment">// Linear Queue Implementation in C++</span>
+<span class="keyword">#include</span> <span class="string">&lt;iostream&gt;</span>
+<span class="keyword">using namespace</span> std;
+
+<span class="keyword">class</span> <span class="type">Queue</span> {
+<span class="keyword">private</span>:
+    <span class="type">int</span> front, rear, size;
+    <span class="type">int</span>* arr;
+    <span class="type">int</span> capacity;
+
+<span class="keyword">public</span>:
+    <span class="function">Queue</span>(<span class="type">int</span> cap) {
+        capacity = cap;
+        arr = <span class="keyword">new</span> <span class="type">int</span>[capacity];
+        front = rear = -1;
+        size = 0;
+    }
+
+    <span class="type">bool</span> <span class="function">isEmpty</span>() {
+        <span class="keyword">return</span> (front == -1 || front > rear);
+    }
+
+    <span class="type">bool</span> <span class="function">isFull</span>() {
+        <span class="keyword">return</span> (rear == capacity - 1);
+    }
+
+    <span class="type">void</span> <span class="function">enqueue</span>(<span class="type">int</span> value) {
+        <span class="keyword">if</span> (isFull()) {
+            cout &lt;&lt; <span class="string">"Queue Overflow!"</span> &lt;&lt; endl;
+            <span class="keyword">return</span>;
+        }
+        <span class="keyword">if</span> (front == -1) front = 0;
+        arr[++rear] = value;
+        size++;
+        cout &lt;&lt; value &lt;&lt; <span class="string">" enqueued"</span> &lt;&lt; endl;
+    }
+
+    <span class="type">int</span> <span class="function">dequeue</span>() {
+        <span class="keyword">if</span> (isEmpty()) {
+            cout &lt;&lt; <span class="string">"Queue Underflow!"</span> &lt;&lt; endl;
+            <span class="keyword">return</span> -1;
+        }
+        <span class="type">int</span> value = arr[front++];
+        size--;
+        <span class="keyword">if</span> (front > rear) front = rear = -1;
+        <span class="keyword">return</span> value;
+    }
+
+    <span class="type">int</span> <span class="function">peek</span>() {
+        <span class="keyword">if</span> (isEmpty()) {
+            cout &lt;&lt; <span class="string">"Queue is empty!"</span> &lt;&lt; endl;
+            <span class="keyword">return</span> -1;
+        }
+        <span class="keyword">return</span> arr[front];
+    }
+
+    <span class="type">void</span> <span class="function">display</span>() {
+        <span class="keyword">if</span> (isEmpty()) {
+            cout &lt;&lt; <span class="string">"Queue is empty!"</span> &lt;&lt; endl;
+            <span class="keyword">return</span>;
+        }
+        <span class="keyword">for</span> (<span class="type">int</span> i = front; i &lt;= rear; i++)
+            cout &lt;&lt; arr[i] &lt;&lt; <span class="string">" "</span>;
+        cout &lt;&lt; endl;
+    }
+};</pre>
+            </div>
+        </div>
+        
+        <!-- Circular Queue Section -->
+        <div class="queue-section">
+            <h2>Circular Queue (Array Implementation)</h2>
+            
+            <div class="controls">
+                <input type="number" id="circularInput" placeholder="Value" min="0">
+                <button onclick="enqueueCircular()">Enqueue</button>
+                <button onclick="dequeueCircular()">Dequeue</button>
+                <button onclick="peekCircular()">Peek/Front</button>
+                <button onclick="displayCircular()">Display</button>
+                <button onclick="isEmptyCircular()">Is Empty?</button>
+                <button onclick="isFullCircular()">Is Full?</button>
+                <button onclick="clearCircular()">Clear</button>
+            </div>
+            
+            <div class="circular-viz" id="circularViz"></div>
+            
+            <div class="info">
+                <p><strong>Front Index:</strong> <span id="cFrontIdx">-1</span></p>
+                <p><strong>Rear Index:</strong> <span id="cRearIdx">-1</span></p>
+                <p><strong>Size:</strong> <span id="cQueueSize">0</span> / 8</p>
+            </div>
+            
+            <div class="output" id="circularOutput" style="display: none;"></div>
+            
+            <div class="code-section">
+                <pre><span class="comment">// Circular Queue Implementation in C++</span>
+<span class="keyword">#include</span> <span class="string">&lt;iostream&gt;</span>
+<span class="keyword">using namespace</span> std;
+
+<span class="keyword">class</span> <span class="type">CircularQueue</span> {
+<span class="keyword">private</span>:
+    <span class="type">int</span> front, rear;
+    <span class="type">int</span>* arr;
+    <span class="type">int</span> capacity;
+
+<span class="keyword">public</span>:
+    <span class="function">CircularQueue</span>(<span class="type">int</span> cap) {
+        capacity = cap;
+        arr = <span class="keyword">new</span> <span class="type">int</span>[capacity];
+        front = rear = -1;
+    }
+
+    <span class="type">bool</span> <span class="function">isEmpty</span>() {
+        <span class="keyword">return</span> (front == -1);
+    }
+
+    <span class="type">bool</span> <span class="function">isFull</span>() {
+        <span class="keyword">return</span> ((rear + 1) % capacity == front);
+    }
+
+    <span class="type">void</span> <span class="function">enqueue</span>(<span class="type">int</span> value) {
+        <span class="keyword">if</span> (isFull()) {
+            cout &lt;&lt; <span class="string">"Queue Overflow!"</span> &lt;&lt; endl;
+            <span class="keyword">return</span>;
+        }
+        <span class="keyword">if</span> (front == -1) front = 0;
+        rear = (rear + 1) % capacity;
+        arr[rear] = value;
+        cout &lt;&lt; value &lt;&lt; <span class="string">" enqueued"</span> &lt;&lt; endl;
+    }
+
+    <span class="type">int</span> <span class="function">dequeue</span>() {
+        <span class="keyword">if</span> (isEmpty()) {
+            cout &lt;&lt; <span class="string">"Queue Underflow!"</span> &lt;&lt; endl;
+            <span class="keyword">return</span> -1;
+        }
+        <span class="type">int</span> value = arr[front];
+        <span class="keyword">if</span> (front == rear) {
+            front = rear = -1;
+        } <span class="keyword">else</span> {
+            front = (front + 1) % capacity;
+        }
+        <span class="keyword">return</span> value;
+    }
+
+    <span class="type">int</span> <span class="function">peek</span>() {
+        <span class="keyword">if</span> (isEmpty()) {
+            cout &lt;&lt; <span class="string">"Queue is empty!"</span> &lt;&lt; endl;
+            <span class="keyword">return</span> -1;
+        }
+        <span class="keyword">return</span> arr[front];
+    }
+
+    <span class="type">void</span> <span class="function">display</span>() {
+        <span class="keyword">if</span> (isEmpty()) {
+            cout &lt;&lt; <span class="string">"Queue is empty!"</span> &lt;&lt; endl;
+            <span class="keyword">return</span>;
+        }
+        <span class="type">int</span> i = front;
+        <span class="keyword">while</span> (<span class="keyword">true</span>) {
+            cout &lt;&lt; arr[i] &lt;&lt; <span class="string">" "</span>;
+            <span class="keyword">if</span> (i == rear) <span class="keyword">break</span>;
+            i = (i + 1) % capacity;
+        }
+        cout &lt;&lt; endl;
+    }
+};</pre>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Linear Queue Implementation
+        class LinearQueue {
+            constructor(capacity) {
+                this.capacity = capacity;
+                this.arr = new Array(capacity);
+                this.front = -1;
+                this.rear = -1;
+            }
+            
+            isEmpty() {
+                return this.front === -1 || this.front > this.rear;
+            }
+            
+            isFull() {
+                return this.rear === this.capacity - 1;
+            }
+            
+            enqueue(value) {
+                if (this.isFull()) {
+                    return "Queue Overflow! Cannot enqueue.";
+                }
+                if (this.front === -1) this.front = 0;
+                this.arr[++this.rear] = value;
+                return `${value} enqueued successfully!`;
+            }
+            
+            dequeue() {
+                if (this.isEmpty()) {
+                    return "Queue Underflow! Cannot dequeue.";
+                }
+                let value = this.arr[this.front++];
+                if (this.front > this.rear) {
+                    this.front = this.rear = -1;
+                }
+                return `${value} dequeued successfully!`;
+            }
+            
+            peek() {
+                if (this.isEmpty()) {
+                    return "Queue is empty!";
+                }
+                return `Front element: ${this.arr[this.front]}`;
+            }
+            
+            getSize() {
+                if (this.isEmpty()) return 0;
+                return this.rear - this.front + 1;
+            }
+        }
+        
+        // Circular Queue Implementation
+        class CircularQueue {
+            constructor(capacity) {
+                this.capacity = capacity;
+                this.arr = new Array(capacity).fill(null);
+                this.front = -1;
+                this.rear = -1;
+            }
+            
+            isEmpty() {
+                return this.front === -1;
+            }
+            
+            isFull() {
+                return (this.rear + 1) % this.capacity === this.front;
+            }
+            
+            enqueue(value) {
+                if (this.isFull()) {
+                    return "Queue Overflow! Cannot enqueue.";
+                }
+                if (this.front === -1) this.front = 0;
+                this.rear = (this.rear + 1) % this.capacity;
+                this.arr[this.rear] = value;
+                return `${value} enqueued successfully!`;
+            }
+            
+            dequeue() {
+                if (this.isEmpty()) {
+                    return "Queue Underflow! Cannot dequeue.";
+                }
+                let value = this.arr[this.front];
+                if (this.front === this.rear) {
+                    this.front = this.rear = -1;
+                    this.arr.fill(null);
+                } else {
+                    this.arr[this.front] = null;
+                    this.front = (this.front + 1) % this.capacity;
+                }
+                return `${value} dequeued successfully!`;
+            }
+            
+            peek() {
+                if (this.isEmpty()) {
+                    return "Queue is empty!";
+                }
+                return `Front element: ${this.arr[this.front]}`;
+            }
+            
+            getSize() {
+                if (this.isEmpty()) return 0;
+                if (this.rear >= this.front) {
+                    return this.rear - this.front + 1;
+                }
+                return this.capacity - this.front + this.rear + 1;
+            }
+        }
+        
+        let linearQueue = new LinearQueue(10);
+        let circularQueue = new CircularQueue(8);
+        
+        function showOutput(id, message) {
+            const output = document.getElementById(id);
+            output.textContent = message;
+            output.style.display = 'block';
+            setTimeout(() => output.style.display = 'none', 3000);
+        }
+        
+        function updateLinearDisplay() {
+            const viz = document.getElementById('linearViz');
+            viz.innerHTML = '<span class="pointer">Front →</span>';
+            
+            if (linearQueue.isEmpty()) {
+                viz.innerHTML += '<span style="color: #999;">Empty Queue</span>';
+            } else {
+                for (let i = linearQueue.front; i <= linearQueue.rear; i++) {
+                    const elem = document.createElement('div');
+                    elem.className = 'queue-element';
+                    elem.textContent = linearQueue.arr[i];
+                    viz.appendChild(elem);
+                }
+            }
+            
+            document.getElementById('frontIdx').textContent = linearQueue.front;
+            document.getElementById('rearIdx').textContent = linearQueue.rear;
+            document.getElementById('queueSize').textContent = linearQueue.getSize();
+        }
+        
+        function updateCircularDisplay() {
+            const viz = document.getElementById('circularViz');
+            viz.innerHTML = '';
+            
+            const radius = 120;
+            const centerX = 150;
+            const centerY = 150;
+            
+            for (let i = 0; i < circularQueue.capacity; i++) {
+                const angle = (i * 2 * Math.PI / circularQueue.capacity) - Math.PI / 2;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                
+                const elem = document.createElement('div');
+                elem.className = 'circular-element';
+                elem.style.left = x + 'px';
+                elem.style.top = y + 'px';
+                
+                if (circularQueue.arr[i] !== null) {
+                    elem.textContent = circularQueue.arr[i];
+                    if (i === circularQueue.front) {
+                        elem.style.border = '3px solid #ffc107';
+                        elem.title = 'Front';
+                    }
+                    if (i === circularQueue.rear) {
+                        elem.style.border = '3px solid #28a745';
+                        elem.title = 'Rear';
+                    }
+                } else {
+                    elem.className += ' empty-slot';
+                    elem.textContent = i;
+                }
+                
+                viz.appendChild(elem);
+            }
+            
+            document.getElementById('cFrontIdx').textContent = circularQueue.front;
+            document.getElementById('cRearIdx').textContent = circularQueue.rear;
+            document.getElementById('cQueueSize').textContent = circularQueue.getSize();
+        }
+        
+        // Linear Queue Operations
+        function enqueueLinear() {
+            const value = parseInt(document.getElementById('queueInput').value);
+            if (isNaN(value)) {
+                showOutput('queueOutput', 'Please enter a valid number!');
+                return;
+            }
+            const msg = linearQueue.enqueue(value);
+            showOutput('queueOutput', msg);
+            updateLinearDisplay();
+            document.getElementById('queueInput').value = '';
+        }
+        
+        function dequeueLinear() {
+            const msg = linearQueue.dequeue();
+            showOutput('queueOutput', msg);
+            updateLinearDisplay();
+        }
+        
+        function peekLinear() {
+            const msg = linearQueue.peek();
+            showOutput('queueOutput', msg);
+        }
+        
+        function displayLinear() {
+            if (linearQueue.isEmpty()) {
+                showOutput('queueOutput', 'Queue is empty!');
+            } else {
+                let elements = [];
+                for (let i = linearQueue.front; i <= linearQueue.rear; i++) {
+                    elements.push(linearQueue.arr[i]);
+                }
+                showOutput('queueOutput', `Queue elements: ${elements.join(' → ')}`);
+            }
+        }
+        
+        function isEmptyLinear() {
+            showOutput('queueOutput', linearQueue.isEmpty() ? 'Yes, queue is empty!' : 'No, queue is not empty!');
+        }
+        
+        function isFullLinear() {
+            showOutput('queueOutput', linearQueue.isFull() ? 'Yes, queue is full!' : 'No, queue is not full!');
+        }
+        
+        function clearLinear() {
+            linearQueue = new LinearQueue(10);
+            updateLinearDisplay();
+            showOutput('queueOutput', 'Queue cleared!');
+        }
+        
+        // Circular Queue Operations
+        function enqueueCircular() {
+            const value = parseInt(document.getElementById('circularInput').value);
+            if (isNaN(value)) {
+                showOutput('circularOutput', 'Please enter a valid number!');
+                return;
+            }
+            const msg = circularQueue.enqueue(value);
+            showOutput('circularOutput', msg);
+            updateCircularDisplay();
+            document.getElementById('circularInput').value = '';
+        }
+        
+        function dequeueCircular() {
+            const msg = circularQueue.dequeue();
+            showOutput('circularOutput', msg);
+            updateCircularDisplay();
+        }
+        
+        function peekCircular() {
+            const msg = circularQueue.peek();
+            showOutput('circularOutput', msg);
+        }
+        
+        function displayCircular() {
+            if (circularQueue.isEmpty()) {
+                showOutput('circularOutput', 'Queue is empty!');
+            } else {
+                let elements = [];
+                let i = circularQueue.front;
+                while (true) {
+                    elements.push(circularQueue.arr[i]);
+                    if (i === circularQueue.rear) break;
+                    i = (i + 1) % circularQueue.capacity;
+                }
+                showOutput('circularOutput', `Queue elements: ${elements.join(' → ')}`);
+            }
+        }
+        
+        function isEmptyCircular() {
+            showOutput('circularOutput', circularQueue.isEmpty() ? 'Yes, queue is empty!' : 'No, queue is not empty!');
+        }
+        
+        function isFullCircular() {
+            showOutput('circularOutput', circularQueue.isFull() ? 'Yes, queue is full!' : 'No, queue is not full!');
+        }
+        
+        function clearCircular() {
+            circularQueue = new CircularQueue(8);
+            updateCircularDisplay();
+            showOutput('circularOutput', 'Queue cleared!');
+        }
+        
+        // Initialize displays
+        updateLinearDisplay();
+        updateCircularDisplay();
+    </script>
+</body>
+</html>
